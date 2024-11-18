@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro</title>
+    <link rel="shortcut icon" href="/imagens/emergencia.png" type="image/x-icon">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            margin: 0;
+            font-family: Arial;
+        }
+
+        .container {
+            max-width: 400px;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .grupo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .grupo img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            font-size: 18px;
+            font-weight: 600;
+            background-color: #40DD00;
+            border-radius: 8px;
+            border: 0;
+            padding: 15px;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #36C200;
+        }
+
+        #codigo-verificacao {
+            display: none;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Cadastro</h2>
+        <form action="/usuario" method="POST" onsubmit="return validarFormulario()">
+            <div class="grupo">
+                <img src="https://cdn-icons-png.flaticon.com/512/126/126341.png" alt="Ícone Telefone">
+                <input type="tel" name="telefone" id="telefone" placeholder="0000000000" required>
+            </div>
+            <div class="grupo">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIrwhoA4s94e1iVq-nMnyDkqwg8fNK9SI1aSqN2B3YZMsmId9TswZNmUCcW8xWfIsNspM&usqp=CAU"
+                    alt="Ícone Nome">
+                <input type="text" name="nome" id="nome" placeholder="Nome completo" required>
+            </div>
+            <div class="grupo">
+                <img src="https://cdn-icons-png.flaticon.com/512/8307/8307165.png" alt="Ícone Data de Nascimento">
+                <input type="date" name="data_nascimento" id="data_nascimento" required>
+            </div>
+            <div class="grupo">
+                <img src="https://img.freepik.com/vetores-gratis/estilo-de-glifo-de-gotas-vermelhas_78370-4807.jpg"
+                    alt="Ícone Tipo Sanguíneo">
+                <select name="tipo" id="tipo" required>
+                    <option value="" disabled selected>Tipo sanguíneo</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+            <div class="grupo">
+                <img src="https://cdn-icons-png.flaticon.com/512/1668/1668490.png" alt="Ícone Peso">
+                <input type="text" name="peso" id="peso" placeholder="Peso (kg)" required>
+            </div>
+            <div class="grupo">
+                <img src="https://cdn-icons-png.flaticon.com/512/4440/4440305.png" alt="Ícone Altura">
+                <input type="text" name="altura" id="altura" placeholder="Altura (cm)" required>
+            </div>
+            <input type="text" name="alergias" id="alergias" placeholder="Alguma alergia?"><br><br>
+            <input type="text" name="informacoes" id="informacoes" placeholder="Outras informações"><br><br>
+            <button type="button" onclick="enviarCodigo()">Enviar Código de Verificação</button>
+
+            <div id="codigo-verificacao">
+                <input type="text" id="codigo" placeholder="Digite o código de verificação" required> <br><br>
+                <button type="button" onclick="verificarCodigo();">
+                    Verificar Código e Concluir Cadastro
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Carrega os valores armazenados
+        document.addEventListener("DOMContentLoaded", () => {
+            const campos = ["telefone", "nome", "data_nascimento", "tipo", "peso", "altura", "alergias", "informacoes"];
+            campos.forEach(campo => {
+                const valor = localStorage.getItem(campo);
+                if (valor) {
+                    document.getElementById(campo).value = valor;
+                }
+            });
+        });
+
+        // Salva os valores no localStorage ao alterar os campos
+        document.querySelectorAll("input, select").forEach(elemento => {
+            elemento.addEventListener("input", (e) => {
+                localStorage.setItem(e.target.id, e.target.value);
+            });
+        });
+
+        function validarFormulario() {
+            const telefone = document.getElementById('telefone').value;
+            const nome = document.getElementById('nome').value;
+            const dataNascimento = document.getElementById('data_nascimento').value;
+            const tipo = document.getElementById('tipo').value;
+            const peso = document.getElementById('peso').value;
+            const altura = document.getElementById('altura').value;
+
+            const telefoneRegex = /^(?:\d{10})$/;
+            const apenasPesoRegex = /^\d+(,\d{1,2})?$/;
+            const alturaRegex = /^\d{1,3},\d{2}$/;
+
+            if (!telefoneRegex.test(telefone)) {
+                alert("Por favor, insira o telefone no formato 0000000000.");
+                return false;
+            }
+            if (!nome.trim()) {
+                alert("O campo 'Nome' é obrigatório.");
+                return false;
+            }
+            if (!dataNascimento.trim()) {
+                alert("O campo 'Data de Nascimento' é obrigatório.");
+                return false;
+            }
+            if (!tipo) {
+                alert("Por favor, selecione um tipo sanguíneo.");
+                return false;
+            }
+            if (!apenasPesoRegex.test(peso)) {
+                alert("O campo 'Peso' deve conter apenas números no formato X,XX.");
+                return false;
+            }
+            if (!alturaRegex.test(altura)) {
+                alert("O campo 'Altura' deve estar no formato X,XX.");
+                return false;
+            }
+            return true;
+        }
+
+        function enviarCodigo() {
+            if (!validarFormulario()) return;
+
+            alert("Código de verificação enviado para " + document.getElementById('telefone').value);
+            document.getElementById('codigo-verificacao').style.display = 'block';
+        }
+
+        function verificarCodigo() {
+            const codigo = document.getElementById('codigo').value;
+
+            if (!codigo) {
+                alert("Por favor, insira o código de verificação.");
+                return;
+            }
+
+            alert("Código verificado com sucesso!");
+            document.querySelector("form").submit();
+
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

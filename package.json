@@ -1,0 +1,19 @@
+{
+  "name": "map-app",
+  "version": "1.0.0",
+  "description": "sei la",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sequelize": "^6.32.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "mysql2": "^3.11.4",
+    "dotenv": "^16.0.0",
+    "ejs": "^3.1.9"
+  }
+}

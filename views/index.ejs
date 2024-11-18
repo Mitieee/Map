@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Chamada de Emergência</title>
+    <link rel="shortcut icon" href="/imagens/emergencia.png" type="image/x-icon">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            margin: 0;
+            font-family: Arial;
+        }
+        .container {
+            max-width: 400px;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .img {
+            height: 120px;
+            width: 120px;
+            border: 2px solid black;
+            cursor: pointer;
+        }
+        input[type="radio"] {
+            display: none;
+        }
+        label img {
+            border: 2px solid black;
+        }
+        input[type="radio"]:checked + label img {
+            border-color: red;
+            transform: scale(1.1);
+        }
+        button {
+            font-size: 18px;
+            font-weight: 600;
+            background-color: #40DD00;
+            border-radius: 8px;
+            border: 0;
+            padding: 15px;
+            width: 100%;
+            cursor: pointer;
+        }
+        .button2 {
+            border: 2px solid black;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 15px;
+            width: 100%;
+            cursor: pointer;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <% if (usuario) { %>
+            <h2>Informações do Usuário</h2>
+            <p><strong>Nome:</strong> <%= usuario.nome %></p>
+            <p><strong>Telefone:</strong> <%= usuario.telefone %></p>
+            <p><strong>Data de Nascimento:</strong> <%= usuario.data_nascimento %></p>
+            <p><strong>Tipo:</strong> <%= usuario.tipo %></p>
+            <p><strong>Peso:</strong> <%= usuario.peso %></p>
+            <p><strong>Altura:</strong> <%= usuario.altura %></p>
+            <p><strong>Alergias:</strong> <%= usuario.alergias %></p>
+            <p><strong>Informações:</strong> <%= usuario.informacoes %></p>
+        <% } else { %>
+            <p>Nenhum cadastro encontrado. Por favor, faça seu cadastro.</p>
+        <% } %>
+        
+        <button class="button2" type="button" onclick="window.location.href='/cadastro'">Dados Pessoais</button>
+
+        <h2>Chamada de Emergência</h2>
+        <form action="../frontend/public/local.html" method="POST">
+            <input type="radio" id="policia" name="emergencia" value="policia" onclick="mostrarMensagemPreDefinida()">
+            <label for="policia">
+                <img class="img" src="https://cdn-icons-png.flaticon.com/512/6310/6310025.png" alt="Polícia">
+            </label>
+
+            <input type="radio" id="bombeiro" name="emergencia" value="bombeiro" onclick="mostrarMensagemPreDefinida()">
+            <label for="bombeiro">
+                <img class="img" src="https://cdn-icons-png.flaticon.com/512/2264/2264252.png" alt="Bombeiro">
+            </label>
+
+            <input type="radio" id="emergencia" name="emergencia" value="emergencia" onclick="mostrarMensagemPreDefinida()">
+            <label for="emergencia">
+                <img class="img" src="https://img.freepik.com/vetores-premium/icone-de-ambulancia-carro-de-emergencia-medica-transporte-paramedico_176411-2886.jpg" alt="Emergência">
+            </label>
+
+            <p><strong><span id="mensagem"></span></strong></p>
+            <button class="button2" type="button" onclick="window.location.href='/local'">Enviar Emergência</button>
+        </form>
+    </div>
+
+    <script>
+        function mostrarMensagemPreDefinida() {
+            const tipoEmergencia = document.querySelector('input[name="emergencia"]:checked');
+            const mensagens = {
+                'policia': 'Chamo a polícia.',
+                'bombeiro': 'Estou em um local com incêndio. Necessito de bombeiros.',
+                'emergencia': 'Estou com uma emergência médica. Preciso de ajuda urgente.'
+            };
+            if (tipoEmergencia) {
+                document.getElementById('mensagem').innerText = mensagens[tipoEmergencia.value] || '';
+            }
+        }
+    </script>
+</body>
+</html>

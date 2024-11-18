@@ -1,0 +1,85 @@
+#map {
+    height: 450px;
+    width: 100%;
+}
+body {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    font-family: Arial;
+}
+.container {
+    max-width: 400px;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.img {
+    height: 30px;
+    width: 30px;
+    cursor: pointer;
+}
+.chat-box {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    height: 200px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+}
+.chat-input {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+.chat-input input {
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+.chat-input button {
+    padding: 5px 10px;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.chat-input button:hover {
+    background-color: #0056b3;
+}
+.chat-message {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 5px 0;
+}
+.chat-message span {
+    flex: 1;
+    text-align: left;
+}
+.chat-buttons button {
+    margin-left: 5px;
+    padding: 2px 5px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.chat-buttons .edit {
+    background-color: #ffc107;
+    color: black;
+}
+.chat-buttons .delete {
+    background-color: #dc3545;
+    color: white;
+}
+.chat-buttons .resend {
+    background-color: #28a745;
+    color: white;
+}
+.chat-buttons .complaint {
+    background-color: #6c757d;
+    color: white;
+}

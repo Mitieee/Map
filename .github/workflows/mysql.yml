@@ -1,0 +1,50 @@
+name: Executar Script MySQL
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  executar-mysql:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checar código
+        uses: actions/checkout@v3
+
+      - name: Esperar MySQL inicializar
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h "127.0.0.1" --silent; then
+              echo "MySQL está pronto!"
+              break
+            fi
+            echo "Esperando MySQL iniciar..."
+            sleep 2
+          done
+
+      - name: Criar Banco de Dados
+        env:
+          MYSQL_PWD: root
+        run: |
+          mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS emergencias;"
+
+      - name: Executar Script SQL
+        env:
+          MYSQL_PWD: root
+        run: |
+          mysql -h 127.0.0.1 -u root emergencias < emergencias.sql
