@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cadastro de Usuário</title>
+    <link
+      rel="shortcut icon"
+      href="frontend/imagens/emergencia.png"
+      type="image/x-icon"
+    />
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial;
+      }
+
+      .container {
+        max-width: 400px;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        width: 100%;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .grupo {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .grupo img {
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 15px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-sizing: border-box;
+      }
+
+      button {
+        font-size: 18px;
+        font-weight: 600;
+        background-color: #40dd00;
+        border-radius: 8px;
+        border: 0;
+        padding: 15px;
+        width: 100%;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #36c200;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Cadastro de Usuário</h2>
+      <form action="/cadastro" method="POST">
+        <input
+          type="text"
+          name="telefone"
+          placeholder="Telefone"
+          required
+        /><br /><br />
+        <input
+          type="text"
+          name="nome"
+          placeholder="Nome completo"
+          required
+        /><br /><br />
+        <input type="date" name="data_nascimento" required /><br /><br />
+        <select name="tipo" required>
+          <option value="" disabled selected>Tipo sanguíneo</option>
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option></select
+        ><br /><br />
+        <input
+          type="text"
+          name="peso"
+          placeholder="Peso (kg)"
+          required
+        /><br /><br />
+        <input
+          type="text"
+          name="altura"
+          placeholder="Altura (cm)"
+          required
+        /><br /><br />
+        <button type="submit">Cadastrar</button>
+      </form>
+    </div>
+  </body>
+</html>
