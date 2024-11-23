@@ -1,76 +1,89 @@
-import { Sequelize } from "@sequelize/core";
-import { MySqlDialect } from "@sequelize/mysql";
-import dotenv from "dotenv";
+import { Sequelize, DataTypes } from 'sequelize';
+import dotenv from 'dotenv';
 dotenv.config();
 
-const sequelize = new Sequelize({
-  dialect: MySqlDialect,
-  database: process.env.DB_DATABASE,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-});
-
-const express = require("express");
-const http = require("http");
-const socketIo = require("socket.io");
-const path = require("path");
+const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "ejs");
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "frontend", "public")));
+app.use(express.static(path.join(__dirname, 'frontend', 'public')));
 
-let users = [];
-let usuario = null;
+const sequelize = new Sequelize(process.env.DB_DATABASE, process.env.DB_USER, process.env.DB_PASSWORD, {
+  host: process.env.DB_HOST,
+  dialect: 'mysql',
+});
 
-app.get("/", (req, res) => {
-  if (usuario) {
-    res.render("index", { usuario: usuario });
-  } else {
-    res.render("index", { usuario: null });
+const Usuario = sequelize.define(
+  'Usuario',
+  {
+    nome: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    telefone: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    data_nascimento: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    tipo_sanguineo: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    peso: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: false,
+    },
+    altura: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: false,
+    },
+  },
+  {
+    tableName: 'usuarios',
+    timestamps: true,
   }
+);
+
+sequelize.sync();
+
+app.get('/', (req, res) => {
+  res.render('index', { usuario: null });
 });
 
-app.get("/cadastro", (req, res) => {
-  res.render("cadastro");
+app.get('/cadastro', (req, res) => {
+  res.render('cadastro');
 });
 
-app.post("/cadastro", (req, res) => {
-  usuario = {
-    nome: req.body.nome,
-    data_nascimento: req.body.data_nascimento,
-    tipo: req.body.tipo,
-    peso: req.body.peso,
-    altura: req.body.altura,
-  };
+app.post('/cadastro', async (req, res) => {
+  const { nome, telefone, data_nascimento, tipo, peso, altura } = req.body;
 
-  res.render("index", { usuario: usuario });
-});
+  try {
+    const novoUsuario = await Usuario.create({
+      nome,
+      telefone,
+      data_nascimento,
+      tipo_sanguineo: tipo,
+      peso,
+      altura,
+    });
 
-io.on("connection", (socket) => {
-  socket.emit("todos-usuarios", users);
-
-  socket.on("enviar-localizacao", (data) => {
-    console.log("Localização recebida:", data);
-    let user = users.find((u) => u.id === data.id);
-    if (user) {
-      user.location = data.location;
-    } else {
-      users.push({ id: data.id, location: data.location });
-    }
-    io.emit("todos-usuarios", users);
-  });
-
-  socket.on("disconnect", () => {
-    users = users.filter((u) => u.id !== socket.id);
-    io.emit("todos-usuarios", users);
-  });
+    res.render('index', { usuario: novoUsuario });
+  } catch (error) {
+    console.error('Erro ao salvar usuário:', error);
+    res.status(500).send('Erro ao salvar usuário.');
+  }
 });
 
 const PORT = process.env.PORT || 3000;
