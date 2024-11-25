@@ -1,67 +1,117 @@
-const socket = io();
-const map = L.map("map", {
-  center: [-23.5505, -46.6333],
-  zoom: 13,
-});
-const userMarkers = {};
-const loadedUsers = new Set();
+let map = L.map('map').setView([-23.5505, -46.6333], 15);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+}).addTo(map);
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {}).addTo(
-  map
-);
+let userMarker;
 
-function sendLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(
-      (position) => {
-        const pos = [position.coords.latitude, position.coords.longitude];
-
-        socket.emit("enviar-localizacao", {
-          id: socket.id,
-          location: pos,
-          nome: "Exemplo",
-        });
-
-        if (!userMarkers[socket.id]) {
-          userMarkers[socket.id] = L.marker(pos)
-            .addTo(map)
-            .bindPopup("Você está aqui!")
-            .openPopup();
-        } else {
-          userMarkers[socket.id].setLatLng(pos);
-        }
-      },
-      (error) => {
-        console.error("Erro ao tentar acessar a localização:", error);
-        alert(
-          "Não foi possível acessar sua localização. Por favor, ative e permita o acesso."
-        );
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0,
-      }
-    );
-  } else {
-    alert("Geolocalização não é suportada pelo seu navegador.");
-  }
+function updatePosition(position) {
+    const pos = [position.coords.latitude, position.coords.longitude];
+    if (!userMarker) {
+        userMarker = L.marker(pos).addTo(map).bindPopup("Você está aqui").openPopup();
+        emergencyResponse("Estou indo!");
+    } else {
+        userMarker.setLatLng(pos);
+    }
+    map.setView(pos, 15);
 }
 
-sendLocation();
+if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(updatePosition, (error) => {
+        console.error("Erro ao obter localização: ", error);
+    });
+} else {
+    alert("Geolocalização não suportada pelo seu navegador.");
+}
 
-socket.on("todos-usuarios", (users) => {
-  users.forEach((user) => {
-    if (user.location && user.id !== socket.id && !loadedUsers.has(user.id)) {
-      loadedUsers.add(user.id);
-      userMarkers[user.id] = L.marker(user.location)
-        .addTo(map)
-        .bindPopup("Emergência está indo")
-        .openPopup();
+function cancelar() {
+    const confirmCancel = confirm("Tem certeza que deseja cancelar?");
+    if (confirmCancel) {
+        sendMessage("Localização cancelada pelo usuário.");
+        emergencyResponse("Cancelamento registrado.");
     }
-  });
-});
+}
 
-map.on("moveend", () => {
-  const center = map.getCenter();
-});
+function sendMessage(content = null) {
+    const chatBox = document.getElementById('chat-box');
+    const chatInput = document.getElementById('chat-message');
+    const message = content || chatInput.value.trim();
+
+    if (message) {
+        const msgElement = document.createElement('div');
+        msgElement.classList.add('chat-message');
+
+        const messageContent = document.createElement('span');
+        messageContent.textContent = `Você: ${message}`;
+
+        const buttons = document.createElement('div');
+        buttons.classList.add('chat-buttons');
+
+        const editButton = document.createElement('button');
+        editButton.classList.add('edit');
+        editButton.textContent = "Editar";
+        editButton.onclick = () => editMessage(msgElement, messageContent);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('delete');
+        deleteButton.textContent = "Cancelar";
+        deleteButton.onclick = () => deleteMessage(msgElement);
+
+        const resendButton = document.createElement('button');
+        resendButton.classList.add('resend');
+        resendButton.textContent = "Reenviar";
+        resendButton.onclick = () => resendMessage(message);
+
+        const complaintButton = document.createElement('button');
+        complaintButton.classList.add('complaint');
+        complaintButton.textContent = "Reclamar";
+        complaintButton.onclick = () => makeComplaint();
+
+        buttons.appendChild(editButton);
+        buttons.appendChild(deleteButton);
+        buttons.appendChild(resendButton);
+        buttons.appendChild(complaintButton);
+
+        msgElement.appendChild(messageContent);
+        msgElement.appendChild(buttons);
+        chatBox.appendChild(msgElement);
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+        chatInput.value = '';
+    }
+}
+
+function emergencyResponse(responseMessage) {
+    const chatBox = document.getElementById('chat-box');
+    const responseElement = document.createElement('div');
+    responseElement.textContent = `Emergência: ${responseMessage}`;
+    responseElement.style.color = "green";
+    chatBox.appendChild(responseElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function editMessage(msgElement, messageContent) {
+    const newMessage = prompt("Edite sua mensagem:", messageContent.textContent.replace("Você: ", ""));
+    if (newMessage !== null) {
+        messageContent.textContent = `Você: ${newMessage}`;
+    }
+}
+
+function deleteMessage(msgElement) {
+    const confirmDelete = confirm("Tem certeza que deseja cancelar esta mensagem?");
+    if (confirmDelete) {
+        msgElement.remove();
+        emergencyResponse("Mensagem cancelada pelo usuário.");
+    }
+}
+
+function resendMessage(message) {
+    alert(`Mensagem reenviada: "${message}"`);
+    emergencyResponse("Mensagem recebida novamente. Estamos analisando.");
+}
+
+function makeComplaint() {
+    alert("Reclamação registrada. A equipe de emergência foi notificada.");
+    emergencyResponse("Reclamação registrada. Agradecemos o feedback.");
+}
+
