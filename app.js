@@ -1,63 +1,42 @@
-import { Sequelize, DataTypes } from 'sequelize';
-import dotenv from 'dotenv';
-dotenv.config();
-
 const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
+const { Sequelize, DataTypes } = require('sequelize');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+const PORT = process.env.PORT || 3000;
 
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'frontend', 'public')));
-
-const sequelize = new Sequelize(process.env.DB_DATABASE, process.env.DB_USER, process.env.DB_PASSWORD, {
+// Configuração do Sequelize para MySQL
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
   host: process.env.DB_HOST,
+  port: process.env.DB_PORT || 3306,
   dialect: 'mysql',
 });
 
-const Usuario = sequelize.define(
-  'Usuario',
-  {
-    nome: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    telefone: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    data_nascimento: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-    },
-    tipo_sanguineo: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    peso: {
-      type: DataTypes.DECIMAL(5, 2),
-      allowNull: false,
-    },
-    altura: {
-      type: DataTypes.DECIMAL(5, 2),
-      allowNull: false,
-    },
-  },
-  {
-    tableName: 'usuarios',
-    timestamps: true,
-  }
-);
+// Configuração do EJS
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
+// Servir arquivos estáticos
+app.use(express.static(path.join(__dirname, 'frontend', 'public')));
+app.use(express.urlencoded({ extended: true }));
+
+// Modelo do Usuário
+const User = sequelize.define('User', {
+  telefone: { type: DataTypes.STRING, allowNull: false },
+  nome: { type: DataTypes.STRING, allowNull: false },
+  data_nascimento: { type: DataTypes.DATEONLY, allowNull: false },
+  tipo: { type: DataTypes.STRING, allowNull: false },
+  peso: { type: DataTypes.FLOAT, allowNull: true },
+  altura: { type: DataTypes.FLOAT, allowNull: true },
+  alergias: { type: DataTypes.STRING, allowNull: true },
+  informacoes: { type: DataTypes.TEXT, allowNull: true },
+});
+
+// Sincronizar o Banco de Dados
 sequelize.sync();
 
+// Rotas
 app.get('/', (req, res) => {
   res.render('index', { usuario: null });
 });
@@ -66,28 +45,29 @@ app.get('/cadastro', (req, res) => {
   res.render('cadastro');
 });
 
-app.post('/cadastro', async (req, res) => {
-  const { nome, telefone, data_nascimento, tipo, peso, altura } = req.body;
-
+app.post('/usuario', async (req, res) => {
   try {
-    const novoUsuario = await Usuario.create({
-      nome,
+    const { telefone, nome, data_nascimento, tipo, peso, altura, alergias, informacoes } = req.body;
+
+    const usuario = await User.create({
       telefone,
+      nome,
       data_nascimento,
-      tipo_sanguineo: tipo,
-      peso,
-      altura,
+      tipo,
+      peso: peso.replace(',', '.'),
+      altura: altura.replace(',', '.'),
+      alergias,
+      informacoes,
     });
 
-    res.render('index', { usuario: novoUsuario });
+    res.render('index', { usuario });
   } catch (error) {
-    console.error('Erro ao salvar usuário:', error);
-    res.status(500).send('Erro ao salvar usuário.');
+    console.error(error);
+    res.status(500).send('Erro ao processar o cadastro.');
   }
 });
 
-const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, () => {
-  console.log(`[SUCESSO] Servidor rodando na porta ${PORT}`);
+// Iniciar Servidor
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
